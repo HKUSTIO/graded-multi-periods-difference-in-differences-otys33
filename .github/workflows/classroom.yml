@@ -1,0 +1,386 @@
+name: Autograding Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  autograde:
+    name: Run Grading
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Core test 1 provided logistic
+        id: core-test-1
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 1 provided logistic
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_logistic_matches_reference_values -q
+          timeout: 10
+          max-score: 2
+
+      - name: Core test 2 provided panel generation
+        id: core-test-2
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 2 provided panel generation
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_generate_panel_data_columns_and_timing -q
+          timeout: 10
+          max-score: 2
+
+      - name: Core test 3 summary columns
+        id: core-test-3
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 3 summary columns
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_summarize_group_shares_columns -q
+          timeout: 10
+          max-score: 4
+
+      - name: Core test 4 summary rows
+        id: core-test-4
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 4 summary rows
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_summarize_group_shares_rows -q
+          timeout: 10
+          max-score: 4
+
+      - name: Core test 5 summary ATT values
+        id: core-test-5
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 5 summary ATT values
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_summarize_group_att_values -q
+          timeout: 10
+          max-score: 8
+
+      - name: Core test 6 cohort DID never controls
+        id: core-test-6
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 6 cohort DID never controls
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_estimate_cohort_did_known_panel -q
+          timeout: 10
+          max-score: 11
+
+      - name: Core test 7 cohort DID not-yet controls
+        id: core-test-7
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 7 cohort DID not-yet controls
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_estimate_cohort_did_notyet_controls -q
+          timeout: 10
+          max-score: 11
+
+      - name: Core test 8 event-study columns
+        id: core-test-8
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 8 event-study columns
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_event_study_columns -q
+          timeout: 10
+          max-score: 5
+
+      - name: Core test 9 event-study estimates
+        id: core-test-9
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 9 event-study estimates
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_event_study_estimates -q
+          timeout: 10
+          max-score: 7
+
+      - name: Core test 10 post-treatment aggregation
+        id: core-test-10
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 10 post-treatment aggregation
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_aggregate_post_treatment_effects -q
+          timeout: 10
+          max-score: 6
+
+      - name: Core test 11 TWFE residualization
+        id: core-test-11
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Core test 11 TWFE residualization
+          setup-command: ""
+          command: uv run pytest tests/test_core.py::test_twfe_coefficient_recovers_residualized_signal -q
+          timeout: 10
+          max-score: 18
+
+      - name: Workflow test 1 top-level files
+        id: workflow-test-1
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Workflow test 1 top-level files
+          setup-command: ""
+          command: uv run pytest tests/test_workflow_modifiable.py::test_required_top_level_files_exist -q
+          timeout: 10
+          max-score: 1
+
+      - name: Workflow test 2 config and source files
+        id: workflow-test-2
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Workflow test 2 config and source files
+          setup-command: ""
+          command: uv run pytest tests/test_workflow_modifiable.py::test_required_config_and_source_files_exist -q
+          timeout: 10
+          max-score: 1
+
+      - name: Workflow test 3 script files
+        id: workflow-test-3
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Workflow test 3 script files
+          setup-command: ""
+          command: uv run pytest tests/test_workflow_modifiable.py::test_required_script_files_exist -q
+          timeout: 10
+          max-score: 1
+
+      - name: Workflow test 4 report file
+        id: workflow-test-4
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Workflow test 4 report file
+          setup-command: ""
+          command: uv run pytest tests/test_workflow_modifiable.py::test_required_report_file_exists -q
+          timeout: 10
+          max-score: 1
+
+      - name: Workflow test 5 report references pipeline script
+        id: workflow-test-5
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Workflow test 5 report references pipeline script
+          setup-command: ""
+          command: uv run pytest tests/test_workflow_modifiable.py::test_report_references_run_script -q
+          timeout: 10
+          max-score: 2
+
+      - name: Prepare report artifacts
+        run: uv run python scripts/run_cleaning.py && uv run python scripts/run_analysis.py && uv run quarto render report/solution.qmd
+
+      - name: Report test 1 cleaned files
+        id: report-test-1
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 1 cleaned files
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_cleaned_files_exist_after_run -q
+          timeout: 10
+          max-score: 2
+
+      - name: Report test 2 output tables
+        id: report-test-2
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 2 output tables
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_output_tables_exist_after_run -q
+          timeout: 10
+          max-score: 2
+
+      - name: Report test 3 results file
+        id: report-test-3
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 3 results file
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_results_file_exists_after_run -q
+          timeout: 10
+          max-score: 1
+
+      - name: Report test 4 TWFE result keys
+        id: report-test-4
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 4 TWFE result keys
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_results_json_twfe_keys -q
+          timeout: 10
+          max-score: 2
+
+      - name: Report test 5 event-study result keys
+        id: report-test-5
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 5 event-study result keys
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_results_json_event_study_keys -q
+          timeout: 10
+          max-score: 2
+
+      - name: Report test 6 shape result keys
+        id: report-test-6
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 6 shape result keys
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_results_json_shape_keys -q
+          timeout: 10
+          max-score: 1
+
+      - name: Report test 7 rendered html exists
+        id: report-test-7
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 7 rendered html exists
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_rendered_html_exists -q
+          timeout: 10
+          max-score: 1
+
+      - name: Report test 8 rendered html sections
+        id: report-test-8
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 8 rendered html sections
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_rendered_html_contains_required_sections -q
+          timeout: 10
+          max-score: 3
+
+      - name: Report test 9 rendered html result key
+        id: report-test-9
+        continue-on-error: true
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Report test 9 rendered html result key
+          setup-command: ""
+          command: uv run pytest tests/test_report.py::test_rendered_html_contains_result_key -q
+          timeout: 10
+          max-score: 2
+
+      - name: Classroom reporter
+        if: always()
+        id: grading-reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          CORE-TEST-1_RESULTS: "${{ steps.core-test-1.outputs.result }}"
+          CORE-TEST-2_RESULTS: "${{ steps.core-test-2.outputs.result }}"
+          CORE-TEST-3_RESULTS: "${{ steps.core-test-3.outputs.result }}"
+          CORE-TEST-4_RESULTS: "${{ steps.core-test-4.outputs.result }}"
+          CORE-TEST-5_RESULTS: "${{ steps.core-test-5.outputs.result }}"
+          CORE-TEST-6_RESULTS: "${{ steps.core-test-6.outputs.result }}"
+          CORE-TEST-7_RESULTS: "${{ steps.core-test-7.outputs.result }}"
+          CORE-TEST-8_RESULTS: "${{ steps.core-test-8.outputs.result }}"
+          CORE-TEST-9_RESULTS: "${{ steps.core-test-9.outputs.result }}"
+          CORE-TEST-10_RESULTS: "${{ steps.core-test-10.outputs.result }}"
+          CORE-TEST-11_RESULTS: "${{ steps.core-test-11.outputs.result }}"
+          WORKFLOW-TEST-1_RESULTS: "${{ steps.workflow-test-1.outputs.result }}"
+          WORKFLOW-TEST-2_RESULTS: "${{ steps.workflow-test-2.outputs.result }}"
+          WORKFLOW-TEST-3_RESULTS: "${{ steps.workflow-test-3.outputs.result }}"
+          WORKFLOW-TEST-4_RESULTS: "${{ steps.workflow-test-4.outputs.result }}"
+          WORKFLOW-TEST-5_RESULTS: "${{ steps.workflow-test-5.outputs.result }}"
+          REPORT-TEST-1_RESULTS: "${{ steps.report-test-1.outputs.result }}"
+          REPORT-TEST-2_RESULTS: "${{ steps.report-test-2.outputs.result }}"
+          REPORT-TEST-3_RESULTS: "${{ steps.report-test-3.outputs.result }}"
+          REPORT-TEST-4_RESULTS: "${{ steps.report-test-4.outputs.result }}"
+          REPORT-TEST-5_RESULTS: "${{ steps.report-test-5.outputs.result }}"
+          REPORT-TEST-6_RESULTS: "${{ steps.report-test-6.outputs.result }}"
+          REPORT-TEST-7_RESULTS: "${{ steps.report-test-7.outputs.result }}"
+          REPORT-TEST-8_RESULTS: "${{ steps.report-test-8.outputs.result }}"
+          REPORT-TEST-9_RESULTS: "${{ steps.report-test-9.outputs.result }}"
+        with:
+          runners: core-test-1,core-test-2,core-test-3,core-test-4,core-test-5,core-test-6,core-test-7,core-test-8,core-test-9,core-test-10,core-test-11,workflow-test-1,workflow-test-2,workflow-test-3,workflow-test-4,workflow-test-5,report-test-1,report-test-2,report-test-3,report-test-4,report-test-5,report-test-6,report-test-7,report-test-8,report-test-9
+
+      - name: Generate feedback content
+        if: always()
+        run: |
+          {
+            echo "## Autograding Results"
+            echo
+            echo "See the Classroom reporter step for component-level scores."
+          } > comment.md
+
+      - name: Publish run summary
+        if: always()
+        run: cat comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post comment to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const comment = fs.readFileSync('comment.md', 'utf8');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c => c.user.type === 'Bot' && c.body.includes('Autograding Results'));
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }

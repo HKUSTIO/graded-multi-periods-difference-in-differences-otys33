@@ -1,0 +1,24 @@
+---
+title: "Difference-in-Differences with Staggered Adoption"
+format:
+  html:
+    embed-resources: true
+---
+
+This report summarizes the multi-period difference-in-differences pipeline. The values should be filled in after running `python scripts/run_pipeline.py` and reading `output/results.json`.
+
+## Group shares and treatment effects
+
+Report the cohort shares and average treatment effects from `output/group_summary_no_covariate_trend.csv`.
+
+## Event-study DID estimates
+
+Report the cohort-event estimates from `output/event_study_no_covariate_trend.csv`, `output/event_study_covariate_trend_never.csv`, and `output/event_study_covariate_trend_notyet.csv`.
+
+## TWFE comparison
+
+Report `twfe_no_covariate_trend` and `twfe_covariate_trend` from `output/results.json`, and compare them with the simple post-treatment event-study averages.
+
+## Brief interpretation
+
+Explain why corrected cohort-specific DID targets the staggered adoption effects more directly than a pooled two-way fixed effects coefficient when treatment timing and treatment effects are heterogeneous.

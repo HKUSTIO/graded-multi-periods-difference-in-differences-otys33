@@ -1,0 +1,15 @@
+[project]
+name = "difference-in-differences-multiperiods-exercise"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "pandas",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

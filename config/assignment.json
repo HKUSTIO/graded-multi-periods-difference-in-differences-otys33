@@ -1,0 +1,24 @@
+{
+  "seed_population": 1,
+  "n_units": 500,
+  "pre_periods": 4,
+  "post_periods": 6,
+  "base_level": 5.4,
+  "individual_sd": 0.15,
+  "error_sd": 0.03,
+  "tau_mean": 0.1,
+  "tau_sd": 0.2,
+  "tau_time_low": 0.9,
+  "tau_time_high": 1.1,
+  "adoption_intercept": -0.25,
+  "adoption_slope_middle": 0.75,
+  "adoption_slope_late": 1.0,
+  "event_times": [-3, -2, -1, 0, 1, 2, 3],
+  "cohorts": [5, 6, 7, 8],
+  "never_treated_label": 0,
+  "heterogeneous_trend": {
+    "baseline_slope": 1.0,
+    "x1_slope": -0.2,
+    "x2_slope": -0.1
+  }
+}
