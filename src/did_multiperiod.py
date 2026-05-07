@@ -89,32 +89,98 @@ def summarize_group_shares_and_att(data: pd.DataFrame) -> pd.DataFrame:
     """
     Return one row per treated cohort and one row for all treated observations.
     """
-    raise NotImplementedError("Implement summarize_group_shares_and_att().")
+    units = data[["id", "cohort"]].drop_duplicates()
+    n_units = units.shape[0]
+    rows = []
+
+    for cohort in sorted(units.loc[units["cohort"] > 0, "cohort"].unique()):
+        cohort_rows = data[(data["cohort"] == cohort) & (data["d"] == 1)]
+        rows.append(
+            {
+                "group": f"cohort_{int(cohort)}",
+                "fraction": float((units["cohort"] == cohort).sum() / n_units),
+                "att": float(cohort_rows["tau_it"].mean()),
+            }
+        )
+
+    treated_rows = data[data["d"] == 1]
+    rows.append(
+        {
+            "group": "all_treated",
+            "fraction": float(treated_rows.shape[0] / data.shape[0]),
+            "att": float(treated_rows["tau_it"].mean()),
+        }
+    )
+
+    return pd.DataFrame(rows, columns=["group", "fraction", "att"])
 
 
 def estimate_cohort_did(data: pd.DataFrame, cohort: int, event_time: int, control_group: str) -> float:
     """
     Return a two-period DID estimate for one treatment cohort and event time.
     """
-    raise NotImplementedError("Implement estimate_cohort_did().")
+    target_time = cohort + event_time
+    baseline_time = cohort - 1
+    treated = data["cohort"] == cohort
+
+    if control_group == "never":
+        controls = data["cohort"] == 0
+    elif control_group == "notyet":
+        controls = (data["cohort"] == 0) | (data["cohort"] > target_time)
+    else:
+        raise ValueError("control_group must be 'never' or 'notyet'.")
+
+    treated_target = data.loc[treated & (data["time"] == target_time), "y"].mean()
+    treated_baseline = data.loc[treated & (data["time"] == baseline_time), "y"].mean()
+    control_target = data.loc[controls & (data["time"] == target_time), "y"].mean()
+    control_baseline = data.loc[controls & (data["time"] == baseline_time), "y"].mean()
+
+    return float((treated_target - treated_baseline) - (control_target - control_baseline))
 
 
 def estimate_event_study(data: pd.DataFrame, event_times: list[int], control_group: str) -> pd.DataFrame:
     """
     Return cohort-event DID estimates.
     """
-    raise NotImplementedError("Implement estimate_event_study().")
+    min_time = data["time"].min()
+    max_time = data["time"].max()
+    cohorts = sorted(data.loc[data["cohort"] > 0, "cohort"].unique())
+    rows = []
+
+    for cohort in cohorts:
+        for event_time in sorted(event_times):
+            target_time = int(cohort) + int(event_time)
+            baseline_time = int(cohort) - 1
+            if min_time <= baseline_time <= max_time and min_time <= target_time <= max_time:
+                rows.append(
+                    {
+                        "cohort": int(cohort),
+                        "event_time": int(event_time),
+                        "estimate": estimate_cohort_did(data, int(cohort), int(event_time), control_group),
+                    }
+                )
+
+    return pd.DataFrame(rows, columns=["cohort", "event_time", "estimate"]).sort_values(
+        ["cohort", "event_time"], ignore_index=True
+    )
 
 
 def aggregate_post_treatment_effects(event_study: pd.DataFrame) -> float:
     """
     Return the average estimate over post-treatment event times.
     """
-    raise NotImplementedError("Implement aggregate_post_treatment_effects().")
+    post = event_study.loc[event_study["event_time"] >= 0, "estimate"]
+    return float(post.mean())
 
 
 def estimate_twfe_coefficient(data: pd.DataFrame) -> float:
     """
     Return the coefficient from a residualized two-way fixed effects regression of y on d.
     """
-    raise NotImplementedError("Implement estimate_twfe_coefficient().")
+    y = data["y"]
+    d = data["d"]
+
+    y_residual = y - data.groupby("id")["y"].transform("mean") - data.groupby("time")["y"].transform("mean") + y.mean()
+    d_residual = d - data.groupby("id")["d"].transform("mean") - data.groupby("time")["d"].transform("mean") + d.mean()
+
+    return float((d_residual * y_residual).sum() / (d_residual**2).sum())
